@@ -1,0 +1,21 @@
+{
+  "name": "monitor-entrevistas",
+  "version": "0.1.0",
+  "description": "Monitor de entrevistas e debates com checagem de fatos em tempo real (Qwen local + Whisper local).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "setup:stt": "powershell -ExecutionPolicy Bypass -File stt/setup.ps1",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:unit": "node --test tests/judge.test.js tests/support.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  }
+}

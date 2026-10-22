@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitor de Entrevistas — Checagem de fatos em tempo real</title>
+  <meta name="description" content="Monitor de entrevistas e debates políticos com transcrição em tempo real, extração de afirmações por IA local e checagem em fontes confiáveis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="m8.5 11 2 2 3.5-4"/></svg>
+      </div>
+      <div>
+        <h1>Monitor de Entrevistas</h1>
+        <p class="tagline">Checagem de fatos ao vivo · IA local</p>
+      </div>
+    </div>
+    <ul class="status-pills" id="status-pills" aria-label="Status dos serviços">
+      <li class="pill" id="pill-llm" title="Modelo de linguagem local"><i></i><span>LLM</span></li>
+      <li class="pill" id="pill-stt" title="Transcrição (Whisper)"><i></i><span>Whisper</span></li>
+      <li class="pill" id="pill-fc" title="Google Fact Check Tools"><i></i><span>Fact Check</span></li>
+      <li class="pill" id="pill-gn" title="GNews"><i></i><span>GNews</span></li>
+    </ul>
+  </header>
+
+  <section class="controls glass" aria-label="Dispositivos e fontes">
+    <label class="field">
+      <span>Câmera</span>
+      <select id="sel-camera"><option value="">Padrão do sistema</option></select>
+    </label>
+    <label class="field">
+      <span>Origem do áudio</span>
+      <select id="sel-source">
+        <option value="screen">Áudio da tela compartilhada</option>
+        <option value="mic">Microfone / dispositivo de entrada</option>
+        <option value="both">Ambos (mixados)</option>
+      </select>
+    </label>
+    <label class="field" id="field-mic">
+      <span>Entrada de áudio</span>
+      <select id="sel-input"><option value="">Padrão do sistema</option></select>
+    </label>
+    <label class="field">
+      <span>Saída de áudio</span>
+      <div class="field-row">
+        <select id="sel-output"><option value="">Padrão do sistema</option></select>
+        <button class="btn btn-ghost btn-icon" id="btn-test-out" type="button" title="Tocar um sinal de teste na saída escolhida" aria-label="Testar saída de áudio">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        </button>
+      </div>
+    </label>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="btn-devices" type="button">Ativar dispositivos</button>
+      <button class="btn btn-secondary" id="btn-screen" type="button">Compartilhar tela</button>
+      <label class="switch" title="Ouvir o áudio monitorado na saída escolhida (use fones para evitar eco)">
+        <input type="checkbox" id="chk-monitor" /><span class="slider"></span><em>Ouvir na saída</em>
+      </label>
+      <button class="btn btn-primary" id="btn-start" type="button">
+        <span class="dot-live" aria-hidden="true"></span><span id="btn-start-label">Iniciar monitoramento</span>
+      </button>
+    </div>
+  </section>
+
+  <main class="stage">
+    <section class="media" aria-label="Vídeo">
+      <div class="question-banner glass" id="question-banner" hidden aria-live="polite">
+        <span class="qb-label">Pergunta em pauta</span>
+        <p id="question-text"></p>
+      </div>
+      <div class="video-grid" id="video-grid" data-layout="cam-only">
+        <figure class="video-card" id="card-cam">
+          <video id="video-cam" autoplay playsinline muted></video>
+          <div class="video-empty" id="empty-cam">Câmera desligada<small>Clique em “Ativar dispositivos”</small></div>
+          <figcaption>Você</figcaption>
+        </figure>
+        <figure class="video-card" id="card-screen">
+          <video id="video-screen" autoplay playsinline muted></video>
+          <div class="video-empty" id="empty-screen">Nenhuma tela compartilhada<small>Marque “Compartilhar áudio” ao escolher</small></div>
+          <figcaption>Tela</figcaption>
+        </figure>
+      </div>
+      <div class="meter" aria-hidden="true"><div id="level-bar"></div></div>
+    </section>
+
+    <aside class="cards-col" aria-label="Checagens">
+      <div class="cards-head">
+        <h2>Checagens</h2>
+        <span id="cards-count" class="muted">0</span>
+      </div>
+      <div id="cards" class="cards" aria-live="polite">
+        <div class="cards-empty" id="cards-empty">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <p>As afirmações checáveis aparecem aqui assim que forem ditas.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <section class="transcript glass" aria-label="Transcrição ao vivo">
+    <div class="transcript-head">
+      <h2>Transcrição ao vivo</h2>
+      <span class="muted" id="stt-state">aguardando</span>
+    </div>
+    <div class="transcript-body" id="transcript" aria-live="polite">
+      <p class="muted" id="transcript-empty">A fala transcrita aparece aqui. Afirmações checáveis ficam sublinhadas.</p>
+    </div>
+    <form class="manual" id="manual-form" autocomplete="off">
+      <input id="manual-input" type="text" placeholder="Modo de teste: digite ou cole uma frase (ex.: “O desemprego no Brasil caiu para 6% em 2024”)" aria-label="Frase de teste" />
+      <button class="btn btn-secondary" type="submit">Enviar</button>
+    </form>
+  </section>
+
+  <div class="toast-zone" id="toasts" aria-live="assertive"></div>
+  <audio id="monitor-audio" autoplay hidden></audio>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.log
+data/
+stt/.venv/
+__pycache__/
+# credenciais Google (contas de serviço)
+agile-magnet-*.json
+*-service-account*.json
